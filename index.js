@@ -3,6 +3,7 @@ import cors from 'cors';
 import { config } from 'dotenv';
 import { connect } from 'mongoose';
 import todoRouter from './routes/TodoRoutes.js';
+import authRouter from './routes/AuthRouter.js';
 
 config();
 
@@ -12,6 +13,8 @@ const port = process.env.PORT || 4523;
 app.use(express.json());
 app.use(cors());
 app.use(todoRouter);
+app.use(authRouter);
+
 
 (async () => {
     try {

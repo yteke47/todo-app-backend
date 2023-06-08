@@ -2,7 +2,7 @@ import TodoModel from '../models/TodoModel.js';
 
 const getTodos = async (req, res) => {
     try {
-        const todos = await TodoModel.find();
+        const todos = await TodoModel.find().sort({ 'createdAt': 'desc' });
         res.status(200).json(todos);
     } catch (error) {
         console.error(error);
@@ -11,9 +11,9 @@ const getTodos = async (req, res) => {
 };
 
 const addTodo = async (req, res) => {
-    const todo = req.body;
+    const { task } = req.body;
     try {
-        const data = await TodoModel.create(todo);
+        const data = await TodoModel.create({ task });
         console.log("Todo added successfully...");
         res.status(201).json(data);
     } catch (error) {
@@ -40,9 +40,10 @@ const deleteTodo = async (req, res) => {
 
 const updateTodo = async (req, res) => {
     const { id } = req.params;
-    const todo = req.body;
+    const { task, isMarked } = req.body;
+
     try {
-        const data = await TodoModel.findByIdAndUpdate(id, todo, { new: true });
+        const data = await TodoModel.findByIdAndUpdate(id, { task, isMarked }, { new: true });
         if (data) {
             console.log("Todo updated successfully...");
             res.status(200).json(data);

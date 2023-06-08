@@ -8,14 +8,11 @@ const todoSchema = new mongoose.Schema({
     isMarked: {
         type: Boolean,
         default: false
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
     }
 }, {
     collection: 'Todo',
-    versionKey: false
+    versionKey: false,
+    timestamps: true,
 });
 
 export default mongoose.model("Todo", todoSchema)
