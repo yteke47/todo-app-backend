@@ -1,8 +1,9 @@
 import TodoModel from '../models/TodoModel.js';
 
 const getTodos = async (req, res) => {
+    const userId = req.user.id;
     try {
-        const todos = await TodoModel.find().sort({ 'createdAt': 'desc' });
+        const todos = await TodoModel.find({ user: userId }).sort({ 'createdAt': 'desc' });
         res.status(200).json(todos);
     } catch (error) {
         console.error(error);
@@ -12,8 +13,9 @@ const getTodos = async (req, res) => {
 
 const addTodo = async (req, res) => {
     const { task } = req.body;
+    const userId = req.user.id;
     try {
-        const data = await TodoModel.create({ task });
+        const data = await TodoModel.create({ task, user: userId });
         console.log("Todo added successfully...");
         res.status(201).json(data);
     } catch (error) {
