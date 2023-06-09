@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
 import { connect } from 'mongoose';
+import helmet from "helmet";
 import todoRouter from './routes/TodoRoutes.js';
 import authRouter from './routes/AuthRouter.js';
 
@@ -11,6 +12,7 @@ const app = express();
 const port = process.env.PORT || 4523;
 
 app.use(express.json());
+app.use(helmet());
 app.use(cors());
 app.use(todoRouter);
 app.use(authRouter);

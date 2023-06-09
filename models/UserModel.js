@@ -30,7 +30,6 @@ userSchema.methods.setPassword = function (password) {
     this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
 };
 
-
 userSchema.methods.validPassword = function (password) {
     const hashedPassword = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
     return crypto.timingSafeEqual(Buffer.from(this.hash, 'hex'), Buffer.from(hashedPassword, 'hex'));
@@ -44,7 +43,6 @@ userSchema.methods.generateJWT = function () {
         email: this.email,
     }, process.env.SECRET, { expiresIn });
 };
-
 
 userSchema.methods.toAuthJSON = function () {
     return {
