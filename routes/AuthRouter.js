@@ -14,8 +14,8 @@ const bodyValidator = (req, res, next) => {
 };
 
 router.use([
-    body('email').isEmail(),
-    body('password').isLength({ min: 8 })
+    body('email').notEmpty().isEmail(),
+    body('password').notEmpty(),
 ], bodyValidator);
 
 router.post('/register', register);
