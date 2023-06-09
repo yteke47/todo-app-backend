@@ -8,6 +8,11 @@ const todoSchema = new mongoose.Schema({
     isMarked: {
         type: Boolean,
         default: false
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Users',
+        required: true
     }
 }, {
     collection: 'Todo',
