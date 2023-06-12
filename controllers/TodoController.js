@@ -21,7 +21,6 @@ const processArray = (array) => {
     return transformedTodos;
 }
 
-
 const getTodos = async (req, res) => {
     const userId = req.user.id;
     try {
@@ -34,7 +33,6 @@ const getTodos = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
-
 
 const addTodo = async (req, res) => {
     const { task } = req.body;
@@ -69,6 +67,22 @@ const deleteTodo = async (req, res) => {
     }
 };
 
+const clearCompleted = async ({ res }) => {
+    try {
+        const data = await TodoModel.deleteMany({ isMarked: true });
+
+        if (data.deletedCount > 0) {
+            console.log("Completed todos deleted successfully...");
+            res.status(200).json({ message: 'Successfuly deleted' });
+        } else {
+            res.status(404).json({ error: 'Marked todos not found' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 const updateTodo = async (req, res) => {
     const { id } = req.params;
     const { task, isMarked } = req.body;
@@ -88,4 +102,4 @@ const updateTodo = async (req, res) => {
     }
 };
 
-export { getTodos, addTodo, deleteTodo, updateTodo };
+export { getTodos, addTodo, deleteTodo, updateTodo, clearCompleted };
