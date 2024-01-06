@@ -1,23 +1,35 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const todoSchema = new mongoose.Schema({
+const todoSchema = new Schema({
     task: {
         type: String,
         required: true
+    },
+    desc: {
+        type: String
+    },
+    dueDate: {
+        type: Date,
+        validate: {
+            validator: function (value) {
+                return value === null || value >= new Date();
+            },
+            message: 'Due date should be in the future or null.',
+        },
     },
     isMarked: {
         type: Boolean,
         default: false
     },
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Users',
         required: true
     }
 }, {
     collection: 'Todo',
     versionKey: false,
-    timestamps: true,
+    timestamps: true
 });
 
-export default mongoose.model("Todo", todoSchema)
+export default model("Todo", todoSchema)

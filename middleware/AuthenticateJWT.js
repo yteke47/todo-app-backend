@@ -1,21 +1,34 @@
 import { verify } from 'jsonwebtoken';
 
-const authenticateJWT = (req, res, next) => {
+const expressJwtMiddleware = async (req, res, next) => {
     const authHeader = req.header('Authorization');
-    const token = authHeader && authHeader.split(" ")[1]
 
-    if (!token) {
-        return res.status(401).json({ message: 'Unauthorized' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Authentication token missing or invalid' });
     }
 
-    verify(token, process.env.SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({ message: 'Invalid token' });
-        }
+    const token = authHeader.split(' ')[1];
 
+    try {
+        const user = await verifyJWT(token);
         req.user = user;
-        next();
+        return next();
+    } catch (error) {
+        return res.status(403).json({ message: 'Invalid token', error: error.message });
+    }
+};
+
+const verifyJWT = (token) => {
+    return new Promise((resolve, reject) => {
+        verify(token, process.env.SECRET, (err, decoded) => {
+            if (err) {
+                reject(`JWT verification failed: ${err.message}`);
+            } else {
+                resolve(decoded);
+            }
+        });
     });
 };
 
-export default authenticateJWT;
+export { expressJwtMiddleware };
+export default verifyJWT;

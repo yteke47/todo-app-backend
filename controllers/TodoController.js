@@ -1,105 +1,86 @@
 import TodoModel from '../models/TodoModel.js';
 
-const processObject = (data) => {
+export const processObject = (data) => {
     return {
         id: data._id,
         task: data.task,
+        desc: data.desc,
+        dueDate: data.dueDate,
         isMarked: data.isMarked,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt
     }
 }
-
-const processArray = (array) => {
-    const transformedTodos = array.map(data => ({
-        id: data._id,
-        task: data.task,
-        isMarked: data.isMarked,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt
-    }));
-    return transformedTodos;
-}
-
-const getTodos = async (req, res) => {
-    const userId = req.user.id;
+export const getTodos = async (req, res) => {
     try {
+        const userId = req.user.id;
         const todos = await TodoModel.find({ user: userId }).sort({ 'createdAt': 'desc' });
-        const transformedTodos = processArray(todos);
+        const transformedTodos = todos.map(todo => processObject(todo));
 
-        res.status(200).json(transformedTodos);
+        return res.status(200).json(transformedTodos);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 };
 
-const addTodo = async (req, res) => {
-    const { task } = req.body;
-    const userId = req.user.id;
+export const addTodo = async (req, res) => {
     try {
-        const data = await TodoModel.create({ task, user: userId });
+        const { task, desc, dueDate } = req.body;
+        const userId = req.user.id;
+        const data = await TodoModel.create({ task, desc, dueDate, user: userId });
         const processedData = processObject(data);
 
-        console.log("Todo added successfully...");
-        res.status(201).json(processedData);
+        return res.status(201).json(processedData);
     } catch (error) {
         console.error(error);
-        res.status(422).json({ error: 'Todo creation failed' });
+        return res.status(422).json({ error: 'Todo creation failed' });
     }
 };
 
-const deleteTodo = async (req, res) => {
-    const { id } = req.params;
+export const deleteTodo = async (req, res) => {
     try {
-        const data = await TodoModel.findByIdAndDelete(id);
-        const processedData = processObject(data);
+        const { id } = req.params;
+        const deletedTodo = await TodoModel.findByIdAndDelete(id);
 
-        if (data) {
-            console.log("Todo deleted successfully...");
-            res.status(200).json(processedData);
-        } else {
-            res.status(404).json({ error: 'Todo not found' });
+        if (!deletedTodo) {
+            return res.status(404).json({ error: 'Todo not found' });
         }
+
+        return res.status(204).send();
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 };
 
-const clearCompleted = async ({ res }) => {
+export const clearCompleted = async ({ res }) => {
     try {
         const data = await TodoModel.deleteMany({ isMarked: true });
 
-        if (data.deletedCount > 0) {
-            console.log("Completed todos deleted successfully...");
-            res.status(200).json({ message: 'Successfuly deleted' });
-        } else {
-            res.status(404).json({ error: 'Marked todos not found' });
+        if (data.deletedCount === 0) {
+            return res.status(404).json({ error: 'Marked todos not found' });
         }
+        return res.status(200).json({ message: 'Successfuly deleted' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 };
 
-const updateTodo = async (req, res) => {
-    const { id } = req.params;
-    const { task, isMarked } = req.body;
+export const updateTodo = async (req, res) => {
     try {
-        const data = await TodoModel.findByIdAndUpdate(id, { task, isMarked }, { new: true });
-        const processedData = processObject(data);
+        const { id } = req.params;
+        const { task, desc, dueDate, isMarked } = req.body;
+        const data = await TodoModel.findByIdAndUpdate(id, { task, desc, dueDate, isMarked }, { new: true });
 
-        if (data) {
-            console.log("Todo updated successfully...");
-            res.status(200).json(processedData);
-        } else {
-            res.status(404).json({ error: 'Todo not found' });
-        }
+        if (!data)
+            return res.status(404).json({ error: 'Todo not found' });
+
+        const processedData = processObject(data);
+        return res.status(200).json(processedData);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 };
-
-export { getTodos, addTodo, deleteTodo, updateTodo, clearCompleted };

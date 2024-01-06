@@ -1,26 +1,28 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import crypto from 'crypto';
 import jwt from "jsonwebtoken";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
     email: {
         type: String,
         lowercase: true,
         unique: true,
         trim: true,
-        required: [true, "can't be blank"],
-        match: [/\S+@\S+\.\S+/, 'is invalid'],
+        required: [true, "Email can't be blank"],
+        match: [/\S+@\S+\.\S+/, 'Invalid email format'],
         index: true
     },
     hash: {
-        type: String,
+        type: String
     },
-    salt: String
+    salt: {
+        type: String
+    }
 }, {
     collection: 'Users',
     versionKey: false,
-    timestamps: true
+    timestamps: true,
 });
 
 userSchema.plugin(uniqueValidator)
@@ -36,7 +38,7 @@ userSchema.methods.validPassword = function (password) {
 };
 
 userSchema.methods.generateJWT = function () {
-    const expiresIn = '60d';
+    const expiresIn = '1h';
 
     return jwt.sign({
         id: this._id,
@@ -52,4 +54,4 @@ userSchema.methods.toAuthJSON = function () {
 };
 
 
-export default mongoose.model("Users", userSchema)
+export default model("Users", userSchema)
